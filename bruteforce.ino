@@ -1,11 +1,15 @@
-// Virginia McCreary // with colten Jackson
+// Virginia McCreary
+// with colten Jackson
 // CUCfablab.org
-// this is open source code, part of open source curriculum
-// use long and prosper ;)
+// open source code, open source curriculum
+// use and prosper ;)
 
 // plug in pins 2 through 13 from this arduino to the locked arduino
 // This arduino will OUTPUT all possible high and low combinations
 // For 8 bits, that's pins 2 through 9
+
+// this is version 1.0 
+// It uses recursion because that's what makes most sense to me... :)
 
 int maxPin = 9; 
 
@@ -21,25 +25,38 @@ void setup() {
   }
   
   // initialize serial communication at 9600 bits per second:
+  // to see output
   //Serial.begin(9600);
   tryBothBits(2);
-
   
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+ 
 
 }
 
 void tryBothBits(int pinNumber) {
     if (pinNumber > maxPin) 
       return; 
-
+    // this is to slow down so that the lock can read and print, which is sloooow
+    delay(80);  
+    
     digitalWrite(pinNumber, HIGH); 
-      tryBothBits(pinNumber++);
-    digitalWrite(pinNumber, LOW);
-      tryBothBits(pinNumber++); 
-      
 
+
+    //Serial.print("1 ");
+    //Serial.println(pinNumber);
+    //delay(10);
+    tryBothBits(pinNumber++);
+    
+    digitalWrite(pinNumber, LOW);
+
+    //Serial.print("0 ");
+    //Serial.println(pinNumber);
+    //delay(10);
+    tryBothBits(pinNumber++); 
+     
+    return;  
 }
