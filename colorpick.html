@@ -16,6 +16,8 @@
 	input[name="colorpick"] {
 		width: 100vw;
 		-moz-appearance: none;
+		-webkit-appearance: none;
+		appearance: none;
 		height: 100px;
 	}
 
@@ -91,7 +93,9 @@
 		showbin.appendChild(div)
 	})
 
-	updateHexBin.call(colorpick)
+	updateHexBin(colorpick)
+	colorpick.addEventListener('input', event => updateHexBin(event.target))
+
 
 	function getquery(){
 		return location
@@ -106,9 +110,9 @@
 					).reduce((a,b) => Object.assign(a,b), new Object)
 	}
 
-	function updateHexBin(){
+	function updateHexBin(colorpick){
 		// if no target value, whats happening ? thats the undefined behavoir, you forgot to define...
-		var color = this.value.slice(1) // drop the leading '#'
+		var color = colorpick.value.slice(1) // drop the leading '#'
 		if(color == lastColor) return null // exit without further calculation
 		else lastColor = color
 
@@ -139,26 +143,4 @@
 		})
 
 	}
-	/*
-	setInterval returns an integer that can be passed to clear interval to stop some update
-	call startWatch() to start watching for changes, stopWatch() to cancel 
-	calling multiple times in either case should have the same effect as calling it once
-	*/
-	let watchInterval = undefined
-	let startWatch = function(event){
-		if(watchInterval == undefined){
-			watchInterval = setInterval(updateHexBin.bind(event.target), 100)
-		}
-	}
-	let stopWatch = function(event){
-		if(watchInterval != undefined){
-			watchInterval = clearInterval(watchInterval)
-		}
-	}
-
-	//.addEventListener('change', event => alert(event.target.value))
-
-	colorpick.addEventListener('click', startWatch)
-	colorpick.addEventListener('change', stopWatch)
-
 </script>	
