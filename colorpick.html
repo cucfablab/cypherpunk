@@ -65,7 +65,7 @@
 </style>
 <form>
 	<input name="colorpick" type="color">
-	<input name="colorform" type="text">
+	<input name="colorform" autocomplete="false" type="text">
 	<div id="showhex"></div>
 	<div id="showbin"></div>
 </form>
@@ -93,8 +93,15 @@
 		showbin.appendChild(div)
 	})
 
-	updateHexBin(colorpick)
-	colorpick.addEventListener('input', event => updateHexBin(event.target))
+	if(getquery().colorform){
+		colorpick.value = '#' + getquery().colorform
+	}
+
+	updateHexBin(colorpick.value)
+
+	colorpick.addEventListener('input', event => 
+		updateHexBin(event.target.value)
+	)
 
 
 	function getquery(){
@@ -110,17 +117,17 @@
 					).reduce((a,b) => Object.assign(a,b), new Object)
 	}
 
-	function updateHexBin(colorpick){
+	function updateHexBin(hexcolor){
+		if(hexcolor.includes('#')) hexcolor = hexcolor.slice(1)
 		// if no target value, whats happening ? thats the undefined behavoir, you forgot to define...
-		var color = colorpick.value.slice(1) // drop the leading '#'
-		if(color == lastColor) return null // exit without further calculation
-		else lastColor = color
+		if(lastColor == hexcolor) return null // exit without further calculation
+		else lastColor = hexcolor
 
-		var red   = parseInt(color.slice(0, 2), 16) // extract leading bits 
-		var green = parseInt(color.slice(2, 4), 16) // extract middle bits
-		var blue  = parseInt(color.slice(4),    16) // extract last hex bytes
+		var red   = parseInt(hexcolor.slice(0, 2), 16) // extract leading bits 
+		var green = parseInt(hexcolor.slice(2, 4), 16) // extract middle bits
+		var blue  = parseInt(hexcolor.slice(4),    16) // extract last hex bytes
 
-		colorform.value = color
+		colorform.value = hexcolor
 		// console.log([red, green, blue])
 		// console.log([red, green, blue].map(color => color.toString(2)))
 		// in hexadecimal we'll get an array of 6 characters 0-f
