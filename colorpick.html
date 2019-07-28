@@ -15,14 +15,17 @@
 
 	input[name="colorpick"] {
 		width: 100vw;
-		-moz-appearance: non;
+		-moz-appearance: none;
 		height: 100px;
 	}
 
 	input[name="colorform"] {
 		position: absolute;
-		right: 10px;
-		top: 60px;
+		right: Calc(50vw - 3em);
+		top: Calc(50px - 1em);
+		text-align: center;
+		width: 6em;
+		height: 2em;
 	}
 
 	#showhex, #showbin {
@@ -30,18 +33,33 @@
 		height: 36px;
 		line-height: 36px;
 	}
-	.hexpiece, .binpiece {
+
+	#showhex > div, #showbin > div {
 		display: inline-block;
 		text-align: center;
 		background: #eee;
 		border:1px solid white;
 	}
-	.hexpiece {
+
+	#showhex > div {
 		width: Calc(100vw / 6);
 	}
-	.binpiece {
+
+	#showbin > div {
 		width: Calc(100vw / 24);
+    transition: background-color 100ms linear;
 	}
+
+	#showbin > div.one {
+		color: white;
+		background: black;
+	}
+
+	#showbin > div.zero {
+		color: black;
+		background: white;
+	}
+
 </style>
 <form>
 	<input name="colorpick" type="color">
@@ -56,8 +74,11 @@
 	let create = document.createElement.bind(document)
 
 	let colorpick = $('input[name="colorpick"]')
+	let colorform = $('input[name="colorform"]')
 	let showhex = $('#showhex')
 	let showbin = $('#showbin')
+
+	let lastColor = null
 
 	Array.from(new Array(6), () => create('div')).forEach(div => {
 		div.classList.add('hexpiece')
@@ -70,23 +91,32 @@
 		showbin.appendChild(div)
 	})
 
-	// location
-	// 	.search
-	// 	.slice(1)
-	// 	.split('&')
-	// 	.map(e => 
-	// 		e.split('=')
-	// 	)
-	// 	.map(([name, value]) => 
-	// 		({[decodeURIComponent(name)]: decodeURIComponent(value)})
-	// 	).reduce((a,b) => Object.assign(a,b), new Object)
+	updateHexBin.call(colorpick)
+
+	function getquery(){
+		return location
+					.search
+					.slice(1)
+					.split('&')
+					.map(e => 
+						e.split('=')
+					)
+					.map(([name, value]) => 
+						({[decodeURIComponent(name)]: decodeURIComponent(value)})
+					).reduce((a,b) => Object.assign(a,b), new Object)
+	}
 
 	function updateHexBin(){
 		// if no target value, whats happening ? thats the undefined behavoir, you forgot to define...
 		var color = this.value.slice(1) // drop the leading '#'
+		if(color == lastColor) return null // exit without further calculation
+		else lastColor = color
+
 		var red   = parseInt(color.slice(0, 2), 16) // extract leading bits 
 		var green = parseInt(color.slice(2, 4), 16) // extract middle bits
 		var blue  = parseInt(color.slice(4),    16) // extract last hex bytes
+
+		colorform.value = color
 		// console.log([red, green, blue])
 		// console.log([red, green, blue].map(color => color.toString(2)))
 		// in hexadecimal we'll get an array of 6 characters 0-f
@@ -104,6 +134,7 @@
 		).reduce((a, b) =>
 			a.concat(b), []
 		).forEach((binbyte, byteindex) => {
+			showbin.childNodes[byteindex].className = parseInt(binbyte) ? 'one' : 'zero'
 			showbin.childNodes[byteindex].textContent = binbyte
 		})
 
@@ -116,7 +147,7 @@
 	let watchInterval = undefined
 	let startWatch = function(event){
 		if(watchInterval == undefined){
-			watchInterval = setInterval(updateHexBin.bind(event.target), 50)
+			watchInterval = setInterval(updateHexBin.bind(event.target), 100)
 		}
 	}
 	let stopWatch = function(event){
