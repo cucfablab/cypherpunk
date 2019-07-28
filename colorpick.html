@@ -1,0 +1,133 @@
+<meta charset="utf8">
+<style>
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		font-family: monospace;
+		font-weight: bold;
+		font-size: large;
+	}
+
+	form {
+		position: relative;
+	}
+
+	input[name="colorpick"] {
+		width: 100vw;
+		-moz-appearance: non;
+		height: 100px;
+	}
+
+	input[name="colorform"] {
+		position: absolute;
+		right: 10px;
+		top: 60px;
+	}
+
+	#showhex, #showbin {
+		width: 100vw;
+		height: 36px;
+		line-height: 36px;
+	}
+	.hexpiece, .binpiece {
+		display: inline-block;
+		text-align: center;
+		background: #eee;
+		border:1px solid white;
+	}
+	.hexpiece {
+		width: Calc(100vw / 6);
+	}
+	.binpiece {
+		width: Calc(100vw / 24);
+	}
+</style>
+<form>
+	<input name="colorpick" type="color">
+	<input name="colorform" type="text">
+	<div id="showhex"></div>
+	<div id="showbin"></div>
+</form>
+<script>
+
+	let $ = document.querySelector.bind(document)
+	let $$ = document.querySelectorAll.bind(document)
+	let create = document.createElement.bind(document)
+
+	let colorpick = $('input[name="colorpick"]')
+	let showhex = $('#showhex')
+	let showbin = $('#showbin')
+
+	Array.from(new Array(6), () => create('div')).forEach(div => {
+		div.classList.add('hexpiece')
+		div.textContent = '0'
+		showhex.appendChild(div)
+	})
+	Array.from(new Array(24), () => create('div')).forEach(div => {
+		div.classList.add('binpiece')
+		div.textContent = '0'
+		showbin.appendChild(div)
+	})
+
+	// location
+	// 	.search
+	// 	.slice(1)
+	// 	.split('&')
+	// 	.map(e => 
+	// 		e.split('=')
+	// 	)
+	// 	.map(([name, value]) => 
+	// 		({[decodeURIComponent(name)]: decodeURIComponent(value)})
+	// 	).reduce((a,b) => Object.assign(a,b), new Object)
+
+	function updateHexBin(){
+		// if no target value, whats happening ? thats the undefined behavoir, you forgot to define...
+		var color = this.value.slice(1) // drop the leading '#'
+		var red   = parseInt(color.slice(0, 2), 16) // extract leading bits 
+		var green = parseInt(color.slice(2, 4), 16) // extract middle bits
+		var blue  = parseInt(color.slice(4),    16) // extract last hex bytes
+		// console.log([red, green, blue])
+		// console.log([red, green, blue].map(color => color.toString(2)))
+		// in hexadecimal we'll get an array of 6 characters 0-f
+		// two characters per color
+		;[red, green, blue].map(color => 
+			 Array.from(color.toString(16).padStart(2, 0))
+		).reduce((a, b) => 
+			a.concat(b), []
+		).forEach((hexbyte, byteindex) => {
+			showhex.childNodes[byteindex].textContent = hexbyte
+		})
+
+		;[red, green, blue].map(color => 
+			Array.from(color.toString(2).padStart(8, 0))
+		).reduce((a, b) =>
+			a.concat(b), []
+		).forEach((binbyte, byteindex) => {
+			showbin.childNodes[byteindex].textContent = binbyte
+		})
+
+	}
+	/*
+	setInterval returns an integer that can be passed to clear interval to stop some update
+	call startWatch() to start watching for changes, stopWatch() to cancel 
+	calling multiple times in either case should have the same effect as calling it once
+	*/
+	let watchInterval = undefined
+	let startWatch = function(event){
+		if(watchInterval == undefined){
+			watchInterval = setInterval(updateHexBin.bind(event.target), 50)
+		}
+	}
+	let stopWatch = function(event){
+		if(watchInterval != undefined){
+			watchInterval = clearInterval(watchInterval)
+		}
+	}
+
+	//.addEventListener('change', event => alert(event.target.value))
+
+	colorpick.addEventListener('click', startWatch)
+	colorpick.addEventListener('change', stopWatch)
+
+</script>	
